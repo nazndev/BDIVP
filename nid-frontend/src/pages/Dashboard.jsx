@@ -16,10 +16,23 @@ const cardStyles = [
   'from-lime-500 to-lime-400',
 ];
 
+function formatDateTime(date) {
+  return date.toLocaleString('en-US', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true
+  });
+}
+
 export default function Dashboard() {
   const { user } = useAuth();
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [now, setNow] = useState(new Date());
 
   useEffect(() => {
     async function fetchStats() {
@@ -44,29 +57,43 @@ export default function Dashboard() {
     fetchStats();
   }, [user]);
 
+  // Update time every minute
+  useEffect(() => {
+    const timer = setInterval(() => setNow(new Date()), 60000);
+    return () => clearInterval(timer);
+  }, []);
+
   return (
     <div className="min-h-screen flex bg-gray-50">
       <Sidebar />
       <div className="flex-1 flex flex-col min-h-screen">
         <Header />
         <main className="flex-1 p-6 bg-gray-50">
-          <h1 className="text-2xl font-bold text-blue-800 mb-6">Welcome, {user?.email}</h1>
+          <div className="text-2xl font-bold text-blue-800 mb-6">{formatDateTime(now)}</div>
           {loading ? (
             <div className="flex items-center justify-center h-40">Loading dashboard...</div>
           ) : user?.role === 'admin' && stats ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-              <DashboardCard color={cardStyles[0]} icon={
-                <svg className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87M16 3.13a4 4 0 010 7.75M8 3.13a4 4 0 010 7.75" /></svg>
-              } label="Users" value={stats.users} link="/users" />
-              <DashboardCard color={cardStyles[1]} icon={
-                <svg className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 1.343-3 3s1.343 3 3 3 3-1.343 3-3-1.343-3-3-3zm0 10c-2.67 0-8 1.337-8 4v2a1 1 0 001 1h14a1 1 0 001-1v-2c0-2.663-5.33-4-8-4z" /></svg>
-              } label="Partners" value={stats.partners} link="/partners" />
-              <DashboardCard color={cardStyles[2]} icon={
-                <svg className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 11c1.657 0 3-1.343 3-3S13.657 5 12 5s-3 1.343-3 3 1.343 3 3 3zm0 2c-2.67 0-8 1.337-8 4v2a1 1 0 001 1h14a1 1 0 001-1v-2c0-2.663-5.33-4-8-4z" /></svg>
-              } label="Active Tokens" value={stats.activeTokens} link="/tokens" />
-              <DashboardCard color={cardStyles[3]} icon={
-                <svg className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 17v-2a4 4 0 014-4h4m0 0V7a4 4 0 00-4-4H7a4 4 0 00-4 4v10a4 4 0 004 4h4" /></svg>
-              } label="Verifications" value={stats.totalVerifications} link="/nid-verification" />
+            <div className="max-w-5xl mx-auto">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                <DashboardCard color={cardStyles[0]} icon={
+                  <svg className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87M16 3.13a4 4 0 010 7.75M8 3.13a4 4 0 010 7.75" /></svg>
+                } label="Users" value={stats.users} link="/users" />
+                <DashboardCard color={cardStyles[1]} icon={
+                  <svg className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 1.343-3 3s1.343 3 3 3 3-1.343 3-3-1.343-3-3-3zm0 10c-2.67 0-8 1.337-8 4v2a1 1 0 001 1h14a1 1 0 001-1v-2c0-2.663-5.33-4-8-4z" /></svg>
+                } label="Partners" value={stats.partners} link="/partners" />
+                <DashboardCard color={cardStyles[2]} icon={
+                  <svg className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 11c1.657 0 3-1.343 3-3S13.657 5 12 5s-3 1.343-3 3 1.343 3 3 3zm0 2c-2.67 0-8 1.337-8 4v2a1 1 0 001 1h14a1 1 0 001-1v-2c0-2.663-5.33-4-8-4z" /></svg>
+                } label="Active Tokens" value={stats.activeTokens} link="/tokens" />
+                <DashboardCard color={cardStyles[3]} icon={
+                  <svg className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 17v-2a4 4 0 014-4h4m0 0V7a4 4 0 00-4-4H7a4 4 0 00-4 4v10a4 4 0 004 4h4" /></svg>
+                } label="Total Verifications" value={stats.verifications?.total ?? 0} link="/nid-verification" />
+                <DashboardCard color={cardStyles[4]} icon={
+                  <svg className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                } label="Success" value={stats.verifications?.success ?? 0} link="/nid-verification?status=success" />
+                <DashboardCard color={cardStyles[5]} icon={
+                  <svg className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                } label="Failed" value={stats.verifications?.failed ?? 0} link="/nid-verification?status=failed" />
+              </div>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
@@ -86,7 +113,7 @@ export default function Dashboard() {
 
 function DashboardCard({ color, icon, label, value, link }) {
   return (
-    <Link to={link} className={`flex flex-col items-center justify-center rounded-2xl shadow-lg p-6 bg-gradient-to-r ${color} text-white hover:scale-105 transition-transform min-h-[120px]`}>
+    <Link to={link} className={`flex flex-col items-center justify-center rounded-2xl shadow-lg p-6 bg-gradient-to-r ${color} text-white hover:scale-105 transition-transform min-h-[120px] w-full`}>
       <div className="mb-2">{icon}</div>
       <div className="text-2xl font-bold">{value}</div>
       <div className="text-sm font-medium opacity-90">{label}</div>
